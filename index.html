@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P4G Style Ultimate Sequence - Mobile Edition</title>
+    <style>
+        :root {
+            --p4-yellow: #ffeb00;
+            --p4-dark: #121212;
+            --tv-red: #ff0040;
+            --tv-green: #00ff66;
+            --tv-blue: #00a2ff;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0a0a0a; 
+            overflow: hidden;
+            font-family: "Impact", "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 全体フェードアウトコンテナ */
+        .main-theater {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            opacity: 1;
+        }
+        .main-theater.fade-out-all {
+            opacity: 0;
+        }
+
+        .wrapper {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* アルカナカードラッパー */
+        .arcana-wrapper {
+            position: absolute;
+            width: 200px;  
+            height: 280px; 
+            z-index: 95; 
+            perspective: 1200px;
+            pointer-events: none;
+            display: none; 
+        }
+
+        .arcana-base-card {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.9));
+            opacity: 1;
+            transform: translateY(-120vh) rotateX(70deg) rotateY(0deg) rotateZ(-360deg) scale(0.1);
+        }
+
+        /* 降下速度（はじっくり0.75秒設定） */
+        .active-arcana .arcana-base-card {
+            animation: arcanaDrop 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes arcanaDrop {
+            0% {
+                transform: translateY(-120vh) rotateX(70deg) rotateY(0deg) rotateZ(-360deg) scale(0.1);
+            }
+            100% {
+                transform: translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(6deg) scale(1.12);
+                filter: drop-shadow(0 0 50px rgba(255,255,255,0.9)) brightness(1.25);
+            }
+        }
+
+        .shatter-piece {
+            position: absolute;
+            width: 200px;  
+            height: 280px;
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            background-position: center;
+            top: 0; left: 0;
+            z-index: 100;
+            pointer-events: none;
+            filter: brightness(1.7) drop-shadow(0 0 15px rgba(255,255,255,0.95));
+        }
+
+        /* スタイリッシュカットインステージ */
+        .cutin-stage {
+            position: relative;
+            width: 100%;
+            height: 300px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        /* スタイリッシュ黄黒極太スリット帯 */
+        .cutin-bg {
+            position: absolute;
+            width: 160%;
+            height: 140px; 
+            background: linear-gradient(
+                to bottom,
+                var(--p4-dark) 0%, var(--p4-dark) 5%,
+                var(--p4-yellow) 5%, var(--p4-yellow) 12%,
+                var(--p4-dark) 12%, var(--p4-dark) 88%,
+                var(--p4-yellow) 88%, var(--p4-yellow) 95%,
+                var(--p4-dark) 95%, var(--p4-dark) 100%
+            );
+            transform: skewX(-18deg) scaleY(0);
+            transform-origin: center;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            opacity: 0;
+            z-index: 1;
+        }
+
+        /* マヨナカテレビ液晶空間 */
+        .cutin-eye-space {
+            position: absolute;
+            width: 160%;          
+            height: 106px;         
+            overflow: hidden;      
+            transform: skewX(-18deg);
+            opacity: 0;
+            z-index: 2;
+            background: linear-gradient(90deg, 
+                var(--tv-red) 0%, var(--p4-yellow) 15%, 
+                var(--tv-green) 35%, var(--tv-blue) 55%, 
+                var(--p4-yellow) 75%, var(--tv-red) 100%
+            );
+            background-size: 300% 100%;
+        }
+
+        /* グリッド・TV走査線オーバーレイ */
+        .cutin-eye-space::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.3) 1px, transparent 1px);
+            background-size: 4px 4px;
+            z-index: 4;
+            opacity: 0.6;
+        }
+
+        .animate-cutin .cutin-eye-space {
+            animation: tvNoiseGlitch 0.15s linear infinite;
+        }
+
+        /* キャラクターコンテナ */
+        .character-container {
+            position: absolute;
+            width: 100%; height: 100%; top: 0; left: 0;
+            transform: skewX(18deg); 
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10; 
+        }
+
+        .character-container img {
+            width: auto; height: 120%; object-fit: contain;  
+            transform: scale(1.05);
+            filter: contrast(1.2) brightness(1.05) drop-shadow(0 0 15px rgba(0,0,0,0.8));
+        }
+
+        /* 光ストリーム */
+        .speed-lines-container {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+            z-index: 6; mix-blend-mode: overlay;
+        }
+
+        /* 流れる太いレーザーライン */
+        .laser-beam {
+            position: absolute;
+            height: 8px;
+            width: 400px;
+            left: -500px;
+            background: linear-gradient(90deg, transparent, #fff 50%, var(--p4-yellow) 80%, transparent);
+            opacity: 0;
+            filter: blur(1px);
+        }
+        .laser-beam.b1 { top: 20%; }
+        .laser-beam.b2 { top: 75%; background: linear-gradient(90deg, transparent, #fff 30%, var(--tv-red) 70%, transparent); }
+
+        .animate-cutin .laser-beam.b1 { animation: laserPass 0.4s cubic-bezier(0.08, 0.82, 0.17, 1) infinite; }
+        .animate-cutin .laser-beam.b2 { animation: laserPass 0.3s cubic-bezier(0.08, 0.82, 0.17, 1) infinite; animation-delay: 0.15s; }
+
+        /* スピードライン */
+        .line { position: absolute; height: 2px; width: 300px; left: -350px; opacity: 0; }
+        .line:nth-child(3n+1) { background: linear-gradient(90deg, transparent, var(--tv-red) 50%, transparent); }
+        .line:nth-child(3n+2) { background: linear-gradient(90deg, transparent, var(--p4-yellow) 60%, transparent); }
+        .line:nth-child(3n+0) { background: linear-gradient(90deg, transparent, #ffffff 50%, transparent); }
+
+        .line:nth-child(1) { top: 10%; }
+        .line:nth-child(2) { top: 35%; height: 3px; width: 400px; }
+        .line:nth-child(3) { top: 55%; } 
+        .line:nth-child(4) { top: 85%; height: 3px; }
+
+        .animate-cutin .line { opacity: 0.9; }
+        .animate-cutin .line:nth-child(1) { animation: rushLine 0.1s linear infinite; }
+        .animate-cutin .line:nth-child(2) { animation: rushLine 0.14s linear infinite; }
+        .animate-cutin .line:nth-child(3) { animation: rushLine 0.08s linear infinite; }
+        .animate-cutin .line:nth-child(4) { animation: rushLine 0.12s linear infinite; }
+
+        /* フラッシュ通過ライン */
+        .flash-line {
+            position: absolute; width: 250%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 70%, transparent 100%);
+            transform: translateX(-100%) skewX(-18deg); z-index: 15;
+        }
+
+        /* 【修正】カットインラインに寄せ、スタイリッシュに被る配置に変更 */
+        .cutin-text {
+            position: absolute; 
+            right: 8%;          /* 右端から少し内側へ寄せ、カットインに被せる */
+            top: -55px;         /* スリットの右上部分にダイナミックに重なる位置に調整 */
+            font-size: 130px;   /* 存在感を出すためにサイズをややアップ */
+            font-weight: 900; 
+            font-style: italic; 
+            color: #fff;
+            text-shadow: 
+                -4px -4px 0 var(--p4-dark), 4px -4px 0 var(--p4-dark), -4px 4px 0 var(--p4-dark), 4px 4px 0 var(--p4-dark), 
+                8px 8px 0 var(--p4-yellow), 13px 13px 0 var(--p4-dark);
+            letter-spacing: -5px; 
+            user-select: none; 
+            opacity: 0; 
+            transform: scale(0) rotate(10deg); 
+            z-index: 25; /* カットインの前面に確実に描画 */
+        }
+
+        /* 連動アニメーション */
+        .animate-cutin .cutin-bg { animation: openSlit 0.22s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        .animate-cutin .cutin-eye-space { opacity: 1; transition: opacity 0.1s; }
+        .animate-cutin .flash-line { animation: flashPass 0.38s ease-out forwards; animation-delay: 0.04s; }
+        .animate-cutin .cutin-text { animation: textPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.4) forwards; animation-delay: 0.08s; }
+
+        /* 全体フラッシュ */
+        .screen-flash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #fff; opacity: 0; pointer-events: none; z-index: 999;
+        }
+        .screen-flash.run { animation: screenFlashAnim 0.38s ease-out forwards; }
+
+        /* キーフレーム */
+        @keyframes openSlit {
+            0% { transform: skewX(-18deg) scaleY(0); opacity: 0; }
+            15% { opacity: 1; }
+            80% { transform: skewX(-18deg) scaleY(1.15); }
+            100% { transform: skewX(-18deg) scaleY(1); opacity: 1; }
+        }
+        @keyframes flashPass {
+            0% { transform: translateX(-100%) skewX(-18deg); }
+            100% { transform: translateX(100%) skewX(-18deg); }
+        }
+        @keyframes laserPass {
+            0% { left: -100%; opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { left: 130%; opacity: 0; }
+        }
+        @keyframes rushLine {
+            0% { left: -100%; }
+            100% { left: 150%; }
+        }
+        @keyframes tvNoiseGlitch {
+            0% { background-position: 0px 0; filter: saturate(1.1) contrast(1.1); }
+            25% { background-position: -30px 0; filter: hue-rotate(-10deg) saturate(1.4); }
+            50% { background-position: 10px 0; }
+            75% { background-position: -10px 0; filter: hue-rotate(12deg) contrast(1.2); }
+            100% { background-position: 0px 0; filter: saturate(1.1) contrast(1.1); }
+        }
+        @keyframes textPop {
+            0% { opacity: 0; transform: scale(0) rotate(22deg) translate(30px, 30px); }
+            75% { opacity: 1; transform: scale(1.2) rotate(-4deg); }
+            100% { opacity: 1; transform: scale(1) rotate(-2deg); }
+        }
+        @keyframes screenFlashAnim {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body onclick="startBattleSequence()">
+
+    <div class="main-theater" id="mainTheater">
+        <div class="wrapper">
+            
+            <!-- アルカナカード配置用ラッパー -->
+            <div class="arcana-wrapper" id="arcanaWrapper">
+                <img id="arcanaBaseCard" class="arcana-base-card" src="" alt="Arcana Card">
+            </div>
+
+            <!-- カットインステージ -->
+            <div class="cutin-stage" id="cutinStage">
+                <div class="cutin-bg"></div>
+                
+                <div class="cutin-eye-space">
+                    <div class="speed-lines-container">
+                        <div class="laser-beam b1"></div>
+                        <div class="laser-beam b2"></div>
+                        
+                        <div class="line"></div><div class="line"></div>
+                        <div class="line"></div><div class="line"></div>
+                    </div>
+                    <div class="character-container">
+                        <img id="cutinImage" src="" alt="Character Front">
+                    </div>
+                </div>
+
+                <div class="flash-line"></div>
+                <div class="cutin-text">カッ</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen-flash" id="screenFlash"></div>
+
+    <script>
+        // =========================================================
+        //  【設定エリア】使いたい画像＆サウンドのファイル名
+        // =========================================================
+        const ARCANA_CARD_FILE_NAME = "IMG_0740.png"; 
+        const CHARACTER_CUTIN_FILE_NAME = "yosuke.png"; 
+        
+        const SOUND_CUTIN = "cutin.mp3";    
+        const SOUND_SHATTER = "shatter.mp3"; 
+        // =========================================================
+
+        const theater = document.getElementById('mainTheater');
+        const wrapper = document.getElementById('arcanaWrapper');
+        const baseCard = document.getElementById('arcanaBaseCard');
+        const stage = document.getElementById('cutinStage');
+        const flash = document.getElementById('screenFlash');
+
+        baseCard.src = ARCANA_CARD_FILE_NAME;
+        document.getElementById('cutinImage').src = CHARACTER_CUTIN_FILE_NAME;
+
+        const audioCutin = new Audio(SOUND_CUTIN);
+        const audioShatter = new Audio(SOUND_SHATTER);
+
+        let isPlaying = false;
+
+        function startBattleSequence() {
+            if (isPlaying) return; 
+            isPlaying = true;
+
+            // クリーンリセット
+            const oldPieces = wrapper.querySelectorAll('.shatter-piece');
+            oldPieces.forEach(p => p.remove());
+            
+            theater.classList.remove('fade-out-all');
+            wrapper.classList.remove('active-arcana');
+            stage.classList.remove('animate-cutin');
+            flash.classList.remove('run');
+            
+            wrapper.style.display = 'none';
+            baseCard.style.display = 'block';
+            baseCard.style.opacity = '1';
+            
+            audioCutin.currentTime = 0;
+            audioShatter.currentTime = 0;
+            
+            void theater.offsetWidth;
+            void wrapper.offsetWidth;
+            void stage.offsetWidth;
+            void flash.offsetWidth;
+            
+            // ─── 段階 1: カットイン発動 ───
+            stage.classList.add('animate-cutin');
+            audioCutin.play().catch(e => console.log("Audio play prevented:", e));
+            
+            // ─── 段階 2: カード出現（遅延＆じっくり降下） ───
+            setTimeout(() => {
+                wrapper.style.display = 'block';
+                wrapper.classList.add('active-arcana');
+            }, 400); 
+
+            // ─── 段階 3: 中央到達後に爆散（3x3分割） ───
+            setTimeout(() => {
+                baseCard.style.display = 'none'; 
+                baseCard.style.opacity = '0';
+                
+                flash.classList.add('run'); 
+                audioShatter.play().catch(e => console.log("Audio play prevented:", e));
+
+                const cols = 3;
+                const rows = 3;
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const piece = document.createElement('div');
+                        piece.className = 'shatter-piece';
+                        piece.style.backgroundImage = `url(${ARCANA_CARD_FILE_NAME})`;
+                        
+                        const x1 = (c / cols) * 100;
+                        const y1 = (r / rows) * 100;
+                        const x2 = ((c + 1) / cols) * 100;
+                        const y2 = ((r + 1) / rows) * 100;
+                        
+                        const j1 = (Math.random() - 0.5) * 6;
+                        const j2 = (Math.random() - 0.5) * 6;
+                        
+                        piece.style.clipPath = `polygon(${x1}% ${y1}%, ${x2 + j1}% ${y1}%, ${x2}% ${y2 + j2}%, ${x1}% ${y2}%)`;
+                        wrapper.appendChild(piece);
+                        
+                        const forceX = (c - (cols / 2 - 0.5)) * 220 + (Math.random() - 0.5) * 200;
+                        const forceY = (r - (rows / 2 - 0.5)) * 220 + (Math.random() - 0.5) * 200;
+                        const rot = (Math.random() - 0.5) * 850;
+                        
+                        piece.animate([
+                            { transform: 'translate(0, 0) rotate(0deg) scale(1)', opacity: 1 },
+                            { transform: `translate(${forceX}px, ${forceY}px) rotate(${rot}deg) scale(0)`, opacity: 0 }
+                        ], {
+                            duration: 500,
+                            easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)',
+                            fill: 'forwards'
+                        });
+                    }
+                }
+                
+                // ─── 段階 4: 余韻のあとに全体フェードアウト ───
+                setTimeout(() => {
+                    theater.classList.add('fade-out-all');
+                    
+                    setTimeout(() => {
+                        isPlaying = false;
+                    }, 600); 
+                }, 900); 
+
+            }, 400 + 750); 
+        }
+    </script>
+</body>
+</html>
